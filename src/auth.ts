@@ -81,20 +81,9 @@ export type StartRemoteSessionResponse = {
   expiresAt: string;
 };
 
-/** Built-in admin accounts — auto-promoted on signup/sign-in */
-export const ADMIN_EMAILS = [
-  "calebdavidbusiness@gmail.com",
-  "onlyonekiragu@gmail.com",
-] as const;
-
-export function isAdminEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase() as (typeof ADMIN_EMAILS)[number]);
-}
-
 export function isAdminUser(user: {
   email: string;
   role?: string;
 }): boolean {
-  return user.role === "admin" || isAdminEmail(user.email);
+  return user.role === "admin";
 }
