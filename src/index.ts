@@ -24,7 +24,16 @@ export type IDEEvent =
   | { type: "terminal_output"; data: string; stream?: "stdout" | "stderr" }
   | { type: "git_status"; changes: GitStatusData }
   | { type: "task_started"; id: string }
-  | { type: "task_completed"; id: string };
+  | { type: "task_completed"; id: string }
+  | {
+      type: "build_complete";
+      taskType: "build" | "test" | "task";
+      taskName: string;
+      status: "success" | "failure";
+      exitCode: number;
+      durationMs: number;
+      output?: string;
+    };
 
 export type Command =
   | { type: "run_command"; command: string; cwd?: string }
