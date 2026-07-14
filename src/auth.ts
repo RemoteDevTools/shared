@@ -23,7 +23,8 @@ export type SubscriptionInfo = {
   status: SubscriptionStatus;
   currentPeriodEnd: string | null;
   trialEndsAt: string | null;
-  stripeCustomerId: string | null;
+  walletAddress: string | null;
+  txHash: string | null;
 };
 
 export type RemoteSession = {
@@ -33,7 +34,6 @@ export type RemoteSession = {
   endedAt: string | null;
   durationSeconds: number | null;
   deviceType: "mobile" | "web" | "unknown";
-  billed: boolean;
 };
 
 export type UsageStats = {
@@ -72,7 +72,7 @@ export const DEFAULT_DASHBOARD_PREFERENCES: DashboardPreferences = {
     "streak",
   ],
   weeklyGoalHours: 10,
-  accentColor: "#3b82f6",
+  accentColor: "#2dd4bf",
 };
 
 export type StartRemoteSessionResponse = {
@@ -84,6 +84,15 @@ export type StartRemoteSessionResponse = {
 export function isAdminUser(user: {
   email: string;
   role?: string;
+  publicMetadata?: Record<string, unknown>;
 }): boolean {
-  return user.role === "admin";
+  if ("role" in user && user.role === "admin") return true;
+  if (
+    "publicMetadata" in user &&
+    user.publicMetadata &&
+    (user.publicMetadata as Record<string, unknown>).role === "admin"
+  ) {
+    return true;
+  }
+  return false;
 }
