@@ -1,61 +1,93 @@
-export type PlanId = "trial" | "monthly" | "yearly";
+export type PlanId = "individual" | "company" | "custom";
 
 export type Plan = {
   id: PlanId;
   name: string;
   description: string;
   priceCents: number;
-  interval: "week" | "month" | "year" | null;
-  sessionsIncluded: number | "unlimited";
-  trialDays?: number;
-  monthlyEquivalentCents?: number;
-  discountPercent?: number;
+  seatsIncluded: number;
+  pricePerSeatCents: number;
+  interval: "month" | "year";
+  yearlyPriceCents: number;
+  yearlyDiscountPercent: number;
   features: string[];
+  trialDays: number;
 };
 
-export const PLANS: Record<PlanId, Plan> = {
-  trial: {
-    id: "trial",
-    name: "Trial",
-    description: "1 free remote session during your first week",
-    priceCents: 0,
-    interval: "week",
-    sessionsIncluded: 1,
-    trialDays: 7,
-    features: [
-      "1 remote session",
-      "7-day trial period",
-      "Full IDE control",
-      "File, terminal & git access",
-    ],
+export const TRIAL_DAYS = 7;
+
+export const PAYMENT_NETWORKS = {
+  celo: {
+    name: "Celo",
+    currency: "USDT",
+    chainId: 42220,
   },
-  monthly: {
-    id: "monthly",
-    name: "Pro",
-    description: "Unlimited remote sessions, billed monthly",
+  base: {
+    name: "Base",
+    currency: "USDC",
+    chainId: 8453,
+  },
+} as const;
+
+export type PaymentNetwork = keyof typeof PAYMENT_NETWORKS;
+
+export const WALLET_ADDRESS = "0xcC67A55fb90d788779a4b58b50786ed488BaC34b";
+
+export const PLANS: Record<PlanId, Plan> = {
+  individual: {
+    id: "individual",
+    name: "Individual",
+    description: "For solo developers — one IDE, unlimited sessions",
     priceCents: 2000,
+    seatsIncluded: 1,
+    pricePerSeatCents: 0,
     interval: "month",
-    sessionsIncluded: "unlimited",
+    yearlyPriceCents: 19200,
+    yearlyDiscountPercent: 20,
+    trialDays: TRIAL_DAYS,
     features: [
+      "1 IDE connection",
       "Unlimited remote sessions",
       "Usage dashboard & analytics",
-      "Priority support",
-      "Custom dashboard widgets",
+      "Full file, terminal & git access",
+      "Web + mobile client access",
     ],
   },
-  yearly: {
-    id: "yearly",
-    name: "Pro Annual",
-    description: "Save 20% with annual billing",
-    priceCents: 19200,
-    interval: "year",
-    sessionsIncluded: "unlimited",
-    monthlyEquivalentCents: 1600,
-    discountPercent: 20,
+  company: {
+    id: "company",
+    name: "Company",
+    description: "For teams — base plan includes admin tools + per-seat pricing",
+    priceCents: 10000,
+    seatsIncluded: 1,
+    pricePerSeatCents: 2000,
+    interval: "month",
+    yearlyPriceCents: 96000,
+    yearlyDiscountPercent: 20,
+    trialDays: TRIAL_DAYS,
     features: [
-      "Everything in Pro",
-      "20% savings vs monthly",
-      "Annual billing",
+      "Everything in Individual",
+      "Org management with Clerk",
+      "Role-based access control",
+      "Priority support",
+      "Usage analytics for all members",
+    ],
+  },
+  custom: {
+    id: "custom",
+    name: "Custom",
+    description: "Dedicated support, custom integrations, flexible terms",
+    priceCents: 25000,
+    seatsIncluded: 1,
+    pricePerSeatCents: 0,
+    interval: "month",
+    yearlyPriceCents: 0,
+    yearlyDiscountPercent: 0,
+    trialDays: 0,
+    features: [
+      "Everything in Company",
+      "Direct support channel",
+      "Custom integrations",
+      "Flexible billing terms",
       "Early access to new features",
     ],
   },
@@ -64,3 +96,38 @@ export const PLANS: Record<PlanId, Plan> = {
 export function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
 }
+
+export function planPriceForInterval(
+  plan: Plan,
+  interval: "month" | "year",
+): number {
+  if (interval === "year" && plan.yearlyPriceCents > 0) {
+    return plan.yearlyPriceCents;
+  }
+  return plan.priceCents;
+}
+
+export function totalCompanyPrice(
+  seats: number,
+  interval: "month" | "year",
+): number {
+  const plan = PLANS.company;
+  const base = planPriceForInterval(plan, interval);
+  const extraSeats = Math.max(0, seats - plan.seatsIncluded);
+  const seatCost = extraSeats * plan.pricePerSeatCents;
+  if (interval === "year" && plan.yearlyPriceCents > 0) {
+    return base + extraSeats * plan.pricePerSeatCents * 12 * 0.8;
+  }
+  return base + seatCost;
+}
+
+export type CryptoPayment = {
+  network: PaymentNetwork;
+  currency: string;
+  chainId: number;
+  toAddress: string;
+  amountUSDCents: number;
+  planId: PlanId;
+  interval: "month" | "year";
+  seats?: number;
+};
