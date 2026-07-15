@@ -49,7 +49,7 @@ Extension ──WS──▶ Agent Server ◀──WS── Mobile / Web
 
 ---
 
-## M1: Build/Task Notification — IN PROGRESS
+## M1: Build/Task Notification — COMPLETE
 
 Goal: VS Code detects build/test completion → agent relays → mobile/web shows notification.
 
@@ -82,16 +82,25 @@ Goal: VS Code detects build/test completion → agent relays → mobile/web show
 
 ---
 
-## M2: Read-Only Viewer — NOT STARTED
+## M2: Read-Only Viewer — IN PROGRESS
 
 Goal: Browse files, view file contents, and see git status/diff from mobile/web.
 
-### Planned
-- [ ] File browser UI (list directories, navigate) — web + mobile
-- [ ] File content preview with syntax highlighting — web + mobile
-- [ ] Git status display (branch, changes list) — web + mobile
-- [ ] Git diff viewer (read-only) — web + mobile
-- [ ] Path navigation (breadcrumbs, up/back button)
+### Completed
+- [x] Web: FilesBrowser component (directory listing, breadcrumb nav, file preview)
+- [x] Web: GitViewer component (branch, changes list, status colors, diff viewer)
+- [x] Web: Dashboard tab navigation (Dashboard | Files | Git)
+- [x] Web: useAgent hook refactored — supports both events and command sending
+- [x] Mobile: FilesScreen breadcrumb navigation (replaced bare path input)
+- [x] Mobile: GitScreen read-only mode (commit/push hidden), status color coding
+- [x] Mobile: Directory names highlighted with accent color
+
+### Not Yet Done
+- [ ] File content syntax highlighting (currently plain monospace)
+- [ ] Pull-to-refresh on file listing and git status
+- [ ] File size metadata in listing
+- [ ] Diff syntax coloring
+- [ ] Sort options (name, type, date)
 - [ ] Real-time `file_opened` event display
 
 ---
